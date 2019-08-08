@@ -151,6 +151,69 @@ read_fat_ok:
 
 	push ax
 
+load_file_sector:
+	mov ax, word [cluster]
+	add ax, 31
+
+	call l2hts
+
+	mov ax, 2000h
+	mov es, ax
+	mov bx, word [pointer]
+
+	pop ax
+	push ax
+
+	stc
+	int 13h
+
+	jnc calculate_next_cluster
+
+	call reset_floppy
+	jmp load_file_sector
+
+
+calculate_next_cluster:
+	mov ax, [cluster]
+	mov dx, 0
+	mov bx, 3
+	mul bx
+	mov bx, 2
+	div bx
+	mov si, buffer
+	add si, ax
+	mov ax, word [ds:si]
+
+	or dx, dx
+
+	jz even
+
+
+odd:
+	shr ax, 4
+	jmp short next_cluster_cont
+
+
+even:
+	and ax, 0FFFh
+
+
+next_cluster_cont:
+	mov word [cluster], ax
+
+	cmp ax, 0FF8h
+	jae end
+
+	add word [pointer], 512
+	jmp load_file_sector
+
+
+end:
+	pop ax
+	mov dl, byte [bootdev]
+
+	jmp 2000h:0000h
+
 ; =============================================================================
 ; Subroutine: reboot
 ; In:     null  null
@@ -182,12 +245,55 @@ print_string:
 .done:
 	ret
 
+reset_floppy:
+	push ax
+	push dx
+	mov ax, 0
+	mov dl, byte [bootdev]
+	stc
+	int 13h
+	pop dx
+	pop ax
+	ret
+
+
+l2hts:
+	push bx
+	push ax
+
+	mov bx, ax
+
+	mov dx, 0
+	div word [SectorsPerTrack]
+	add dl, 01h
+	mov cl, dl
+	mov ax, bx
+
+	mov dx, 0
+	div word [SectorsPerTrack]
+	mov dx, 0
+	div word [Sides]
+	mov dh, dl
+	mov ch, al
+
+	pop ax
+	pop bx
+
+	mov dl, byte [bootdev]
+
+	ret
+
 ; =============================================================================
 ; Data definitions:
-	text_string db 'Welcome to JZNOS Bootloader 1.0', 0
-	disk_error db 'Error 1: Fatal Disk Error, FAT not read', 0
+	kern_filename db 'KERNEL BIN'
+	
+	disk_error db 'ERROR 1: Fatal disk error', 0
+	file_not_found db 'ERROR 2: File not found',0
+
 	times 510-($-$$) db 0               ;pad remainder of boot sector with 0s
 	dw 0AA55h                           ;The standard pc boot signature
+
+buffer:
 ; -----------------------------------------------------------------------------
 ; ----------------------------END OF BOOTLOADER--------------------------------
 ; -----------------------------------------------------------------------------
