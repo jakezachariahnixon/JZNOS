@@ -24,7 +24,7 @@
   DriveNo			      dw 0			        ; Drive No: 0
   Signature		      db 41			        ; Drive signature: 41 for floppy
   VolumeID		      dd 00000000h	    ; Volume ID: any number
-  VolumeLabel		    db "JESUSOS    "  ; Volume Label must be 11 char
+  VolumeLabel		    db "JZNOS      "  ; Volume Label must be 11 char
   FileSystem		    db "FAT12   "     ; File system type
 ; =============================================================================
 
