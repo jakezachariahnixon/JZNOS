@@ -27,6 +27,11 @@
   VolumeLabel		    db "JESUSOS    "  ; Volume Label must be 11 char
   FileSystem		    db "FAT12   "     ; File system type
 ; =============================================================================
+
+os_call_vectors:
+	jmp start			; 0000h
+	jmp os_print_string	; 0003h
+
 ; Main program flow:
 start:
 	mov ax, 07C0h                       ; 4k stack space after bootloader
@@ -38,29 +43,15 @@ start:
 	mov ax, 07C0h                       ; Set data segment to where we are loaded
 	mov ds, ax
 	mov si, text_string                 ; SI <-- null terminated string to print
-	call print_string
+	call os_print_string
 	jmp $                               ; Infinite loop to keep text on screen
 ; =============================================================================
+
+; Include:
+	%INCLUDE "lib/graphic.asm"
+
 ; Data definitions:
 	text_string db 'Welcome to JZNOS Bootloader 1.0', 0
-; =============================================================================
-; Subroutine: print_string
-; In:     SI    Null terminated string to print
-; Out:    null  null
-; Effect:       Prints the string held in SI
-print_string:                         
-	mov ah, 0Eh
-; -----------------------------------------------------------------------------
-.repeat:
-	lodsb                               ; Get char from string
-	cmp al, 0					
-	je .done                            ; if char = 0 then jump to .done
-	int 10h                             ; else print character to screen
-	jmp .repeat
-; -----------------------------------------------------------------------------
-.done:
-	ret
-; =============================================================================
 	times 510-($-$$) db 0               ;pad remainder of boot sector with 0s
 	dw 0AA55h                           ;The standard pc boot signature
 ; -----------------------------------------------------------------------------
