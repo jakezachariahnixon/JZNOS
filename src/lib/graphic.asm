@@ -13,12 +13,12 @@ os_print_string:
     pusha
     mov             ah,             0Eh
 ; -----------------------------------------------------------------------------
-.repeat:
+.os_print_string_repeat:
 	lodsb                                  ; Get char from string
 	cmp            al,             0
-	je             .done                   ; if char = 0 then jump to .done
+	je             .os_print_string_done   ; if char = 0 then jump to .done
 	int            10h                     ; else print character to screen
-	jmp            .repeat
+	jmp            .os_print_string_repeat
 ; -----------------------------------------------------------------------------
-.done:
+.os_print_string_done:
 	ret
