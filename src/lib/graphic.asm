@@ -25,11 +25,11 @@ os_print_string:
 
 ; =============================================================================
 ; Subroutine: os_move_cursor
-; In:     null  null
+; In:     dh    row number
+;         dl    col number
 ; Out:    null  null
-; Effect:       null
+; Effect:       Move cursor to row, col
 ; =============================================================================
-
 os_move_cursor:
     pusha
 
