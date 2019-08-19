@@ -31,4 +31,15 @@ os_print_string:
 ; =============================================================================
 
 os_move_cursor:
+    pusha
+
+    mov             bh,             0
+    mov             ah,             3
+    int             10h
+
+    mov             [.os_move_cursor_tmp], dx
+    popa
+    mov             dx, [.os_move_cursor_tmp]
     ret
+
+    .os_move_cursor_tmp dw 0
